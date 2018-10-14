@@ -226,10 +226,12 @@ int UartPsPolledExample(u16 DeviceId)
 		RecvBuffer[Index] = 0;
 	}
 
+	while(1){
 	/* Block sending the buffer. */
 	SentCount = XUartPs_Send(&Uart_PS, SendBuffer, TEST_BUFFER_SIZE);
-	if (SentCount != TEST_BUFFER_SIZE) {
-		return XST_FAILURE;
+	//if (SentCount != TEST_BUFFER_SIZE) {
+		//return XST_FAILURE;
+	//}
 	}
 
 	/*
