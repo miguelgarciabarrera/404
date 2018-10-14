@@ -72,7 +72,7 @@
  * and received with the device, this constant must be 32 bytes or less since
  * only as much as FIFO size data can be sent or received in polled mode.
  */
-#define TEST_BUFFER_SIZE 2		// SEND INTERVALS OF 2 BYTES, mg
+#define TEST_BUFFER_SIZE 16		// SEND INTERVALS OF 2 BYTES, mg
 
 /**************************** Type Definitions *******************************/
 
@@ -90,8 +90,13 @@ XUartPs Uart_PS;		/* Instance of the UART Device */
  * The following buffers are used in this example to send and receive data
  * with the UART.
  */
-static u8 SendBuffer[TEST_BUFFER_SIZE];	/* Buffer for Transmitting Data */
+static u8 SendBuffer[TEST_BUFFER_SIZE];	/* Buffer for Transmitting Data - change to char to debug */
 static u8 RecvBuffer[TEST_BUFFER_SIZE];	/* Buffer for Receiving Data */
+
+// declare variables for TX part
+int ConsoleTXBufferLen = 0;
+int SendComplete = 1;
+int ConsoleTXBufferIndex = 0;
 
 
 /*****************************************************************************/
@@ -212,7 +217,7 @@ int UartPsPolledExample(u16 DeviceId)
 	XUartPs_SetBaudRate(&Uart_PS, 9600);	// changed value
 
 
-	/* Use local loopback mode.
+	/* Example used local loopback mode.
 	 * CHANGED TO NORMAL MODE , mg
 	 *  */
 	XUartPs_SetOperMode(&Uart_PS, XUARTPS_OPER_MODE_NORMAL);
@@ -222,26 +227,51 @@ int UartPsPolledExample(u16 DeviceId)
 	 * the receive buffer.
 	 */
 	for (Index = 0; Index < TEST_BUFFER_SIZE; Index++) {
-		SendBuffer[Index] = '0' + Index;
+		//SendBuffer[Index] = '0' + Index;  // this is getting : and ; for #s over 9
+		SendBuffer[Index] = Index;
 		RecvBuffer[Index] = 0;
 	}
 
-	while(1){
+
+	/*
+	 * --------------------------------------------------------------------------
+	 * --------------------------------------------------------------------------
+	 * --------------------------------------------------------------------------
+	 * --------------------------------------------------------------------------
+	 */
+
+	//while(1){
 	/* Block sending the buffer. */
-	SentCount = XUartPs_Send(&Uart_PS, SendBuffer, TEST_BUFFER_SIZE);
-	//if (SentCount != TEST_BUFFER_SIZE) {
-		//return XST_FAILURE;
-	//}
+	ConsoleTXBufferLen = XUartPs_Send(&Uart_PS, SendBuffer, TEST_BUFFER_SIZE);  // get length of send buffer
+	if (ConsoleTXBufferLen != TEST_BUFFER_SIZE) {
+		return XST_FAILURE;
 	}
+
+	//Frankenstein version of send_string_buffer function from Dr. Lusher
+	ConsoleTXBufferIndex = 0;
+	SendComplete = 0;
+
+	if (ConsoleTXBufferIndex <  ConsoleTXBufferLen)
+		{
+			XUartPs_Send(&Uart_PS, (u8 *)&SendBuffer[ConsoleTXBufferIndex++], 1);
+		}
 
 	/*
 	 * Wait while the UART is sending the data so that we are guaranteed
 	 * to get the data the 1st time we call receive, otherwise this function
 	 * may enter receive before the data has arrived
 	 */
-	while (XUartPs_IsSending(&Uart_PS)) {
+	while (XUartPs_IsSending(&Uart_PS)) {	// check if device is still sending data, if so delay by incrementing loopcount+
 		LoopCount++;
 	}
+
+
+	/*
+	 * --------------------------------------------------------------------------
+	 * --------------------------------------------------------------------------
+	 * --------------------------------------------------------------------------
+	 * --------------------------------------------------------------------------
+	 */
 
 	/* Block receiving the buffer. */
 	ReceivedCount = 0;
@@ -262,7 +292,7 @@ int UartPsPolledExample(u16 DeviceId)
 	}
 
 	/* Restore to normal mode. */
-	XUartPs_SetOperMode(&Uart_PS, XUARTPS_OPER_MODE_NORMAL);
+	//XUartPs_SetOperMode(&Uart_PS, XUARTPS_OPER_MODE_NORMAL);
 
 	return XST_SUCCESS;
 }
