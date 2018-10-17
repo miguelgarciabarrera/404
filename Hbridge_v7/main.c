@@ -35,26 +35,23 @@
 #define CLK_FREQ 1000000
 #endif
 
-#define PWM_PER              2
+#define PWM_PER 2
 
 
 
 /************ Function Prototypes ************/
 
 void DemoInitialize();
-
 void Run();
-
 void DemoCleanup();
 
 void EnableCaches();
-
 void DisableCaches();
 
 void drive_forward();
-
 void drive_back();
-
+void drive_left();
+void drive_right();
 
 /************ Global Variables ************/
 
@@ -66,9 +63,7 @@ PmodDHB2 pmodDHB2;
 int main(void) {
    DemoInitialize();
 
-
    Run();
-
 
    DemoCleanup();
    return 0;
@@ -87,15 +82,15 @@ void DemoInitialize() {
 }
 
 void Run() {
-   // first parameter is low, second parameter is high.
-   DHB1_setMotorSpeeds(&pmodDHB1, 95, 95);		// JD = motor 1 top, motor 2 bottom
-   DHB2_setMotorSpeeds(&pmodDHB2, 95, 95);		// JE = motor 3 top, motor 4 bottom
 
    drive_forward();
    usleep(6);
    drive_back();
-
-
+   usleep(6);
+   drive_left();
+   usleep(6);
+   drive_right();
+   usleep(6);
 }
 
 void DemoCleanup() {
@@ -103,6 +98,9 @@ void DemoCleanup() {
 }
 
 void drive_forward() { // case to move all 4 motors forward
+   DHB1_setMotorSpeeds(&pmodDHB1, 99, 99);		// JD = motor 1 top, motor 2 bottom
+   DHB2_setMotorSpeeds(&pmodDHB2, 99, 99);		// JE = motor 3 top, motor 4 bottom
+
    DHB1_motorDisable(&pmodDHB1); // Disable PWM before changing direction
    DHB2_motorDisable(&pmodDHB2); // short circuit possible otherwise
    usleep(6);
@@ -118,7 +116,10 @@ void drive_forward() { // case to move all 4 motors forward
    DHB2_motorDisable(&pmodDHB2);
 }
 
-void drive_back() { // case to move all 4 motors forward
+void drive_back() { // case to move all 4 motors backward
+   DHB1_setMotorSpeeds(&pmodDHB1, 99, 99);		// JD = motor 1 top, motor 2 bottom
+   DHB2_setMotorSpeeds(&pmodDHB2, 99, 99);		// JE = motor 3 top, motor 4 bottom
+
    DHB1_motorDisable(&pmodDHB1); // Disable PWM before changing direction
    DHB2_motorDisable(&pmodDHB2); // short circuit possible otherwise
    usleep(6);
@@ -129,7 +130,51 @@ void drive_back() { // case to move all 4 motors forward
    DHB1_motorEnable(&pmodDHB1);	// Motors A and B
    DHB2_motorEnable(&pmodDHB2);	// Motors C and D
 
-   xil_printf("\nRunning 4 motors forward\n");
+   xil_printf("\nRunning 4 motors backward\n");
+   usleep(6);
+   DHB1_motorDisable(&pmodDHB1);
+   DHB2_motorDisable(&pmodDHB2);
+}
+
+/*move C and D motors at max seed, but still move A and B at min speed to help with torque
+ * directions set in move forward mode	*/
+void drive_left() {
+   DHB1_setMotorSpeeds(&pmodDHB1, 10, 10);		// JD = motor 1 top, motor 2 bottom
+   DHB2_setMotorSpeeds(&pmodDHB2, 99, 99);		// JE = motor 3 top, motor 4 bottom
+
+   DHB1_motorDisable(&pmodDHB1); // Disable PWM before changing direction
+   DHB2_motorDisable(&pmodDHB2); // short circuit possible otherwise
+   usleep(6);
+   DHB1_setDirs(&pmodDHB1, 0, 0); // Set DIR A and B motors forward (left side)
+   DHB2_setDirs(&pmodDHB2, 1, 1); // Set DIR C and D motors forward (right side)
+   usleep(6);
+
+   DHB1_motorEnable(&pmodDHB1);	// Motors A and B
+   DHB2_motorEnable(&pmodDHB2);	// Motors C and D
+
+   xil_printf("\nRunning 4 motors backward\n");
+   usleep(6);
+   DHB1_motorDisable(&pmodDHB1);
+   DHB2_motorDisable(&pmodDHB2);
+}
+
+/*move A and B motors at max speed, but still move C and D at min speed to help with torque
+ * directions set in move forward mode	*/
+void drive_right() {
+   DHB1_setMotorSpeeds(&pmodDHB1, 99, 99);		// JD = motor 1 top, motor 2 bottom
+   DHB2_setMotorSpeeds(&pmodDHB2, 10, 10);		// JE = motor 3 top, motor 4 bottom
+
+   DHB1_motorDisable(&pmodDHB1); // Disable PWM before changing direction
+   DHB2_motorDisable(&pmodDHB2); // short circuit possible otherwise
+   usleep(6);
+   DHB1_setDirs(&pmodDHB1, 0, 0); // Set DIR A and B motors forward (left side)
+   DHB2_setDirs(&pmodDHB2, 1, 1); // Set DIR C and D motors forward (right side)
+   usleep(6);
+
+   DHB1_motorEnable(&pmodDHB1);	// Motors A and B
+   DHB2_motorEnable(&pmodDHB2);	// Motors C and D
+
+   xil_printf("\nRunning 4 motors backward\n");
    usleep(6);
    DHB1_motorDisable(&pmodDHB1);
    DHB2_motorDisable(&pmodDHB2);
