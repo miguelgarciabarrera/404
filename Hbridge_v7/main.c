@@ -1,18 +1,15 @@
 /******************************************************************************/
 /*                                                                            */
-/* main.c -- Example program using the PmodDHB1 IP                            */
+/* main.c -- Program to drive 2 dual channel H-bridges (i.e. 4 motors)        */
 /*                                                                            */
 /*                                                                            */
 /******************************************************************************/
 /* File Description:                                                          */
 /*                                                                            */
-/* This demo drives 2 motors in the 4 possible directions. When mounted on a  */
-/* 2-wheel chassis, the motors will be driven such that the robot goes        */
-/* forward, goes backward, turns left, and turns right.                       */
-/*                                                                            */
+/* This program drives 4 motors in the 4 possible directions using tank       */
+/* steering.                                                                  */
+/******************************************************************************/
 
-
-#include "MotorFeedback.h"
 #include "PmodDHB1.h"
 #include "PWM.h"
 #include "sleep.h"
@@ -25,7 +22,6 @@
 //PMOD JD
 #define JD_GPIO_BASEADDR     XPAR_PMODDHB1_0_AXI_LITE_GPIO_BASEADDR
 #define JD_PWM_BASEADDR      XPAR_PMODDHB1_0_PWM_AXI_BASEADDR
-//#define JD_MOTOR_FB_BASEADDR XPAR_PMODDHB1_0_MOTOR_FB_AXI_BASEADDR
 
 //PMOD JE
 #define JE_GPIO_BASEADDR     XPAR_PMODDHB1_1_AXI_LITE_GPIO_BASEADDR
@@ -40,8 +36,7 @@
 #endif
 
 #define PWM_PER              2
-//#define SENSOR_EDGES_PER_REV 4
-//#define GEARBOX_RATIO        48
+
 
 
 /************ Function Prototypes ************/
@@ -52,19 +47,17 @@ void DemoRun();
 
 void DemoCleanup();
 
-//void drive(int16_t sensor_edges);
-
 void EnableCaches();
 
 void DisableCaches();
+
+void drive();
 
 
 /************ Global Variables ************/
 
 PmodDHB1 pmodDHB1;
 PmodDHB2 pmodDHB2;
-//MotorFeedback motorFeedback;
-
 
 /************ Function Definitions ************/
 
@@ -82,21 +75,11 @@ int main(void) {
 void DemoInitialize() {
    EnableCaches();
 
-   //init 2 motors
+   //init the 2 hbridges
    DHB1_begin(&pmodDHB1, JD_GPIO_BASEADDR, JD_PWM_BASEADDR, CLK_FREQ, PWM_PER);
    DHB2_begin(&pmodDHB2, JE_GPIO_BASEADDR, JE_PWM_BASEADDR, CLK_FREQ, PWM_PER);
 
-   /*
-   MotorFeedback_init(
-      &motorFeedback,
-      MOTOR_FB_BASEADDR,
-      CLK_FREQ,
-      SENSOR_EDGES_PER_REV,
-      GEARBOX_RATIO
-   );
-   */
-
-   // disable 2 motors
+   // disable the 2 hbridges
    DHB1_motorDisable(&pmodDHB1);
    DHB2_motorDisable(&pmodDHB2);
 }
@@ -105,9 +88,6 @@ void DemoRun() {
    // first parameter is low, second parameter is high.
    DHB1_setMotorSpeeds(&pmodDHB1, 95, 95);		// JD = motor 1 top, motor 2 bottom
    DHB2_setMotorSpeeds(&pmodDHB2, 95, 95);		// JE = motor 3 top, motor 4 bottom
-
-
-  // MotorFeedback_clearPosCounter(&motorFeedback);
 
    DHB1_motorDisable(&pmodDHB1); // Disable PWM before changing direction
    DHB2_motorDisable(&pmodDHB2);
