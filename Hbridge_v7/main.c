@@ -146,8 +146,8 @@ void DemoCleanup() {
 }
 
 void drive() {
-   DHB1_motorEnable(&pmodDHB1);
-   DHB2_motorEnable(&pmodDHB2);
+   DHB1_motorEnable(&pmodDHB1);	// Motors A and B
+   DHB2_motorEnable(&pmodDHB2);	// Motors C and D
 
    for(int delay=0; delay<2500; delay++){
 	   xil_printf("Value of speed: %d \r \n",delay);
