@@ -43,7 +43,7 @@
 
 void DemoInitialize();
 
-void DemoRun();
+void Run();
 
 void DemoCleanup();
 
@@ -51,7 +51,9 @@ void EnableCaches();
 
 void DisableCaches();
 
-void drive();
+void drive_forward();
+
+void drive_back();
 
 
 /************ Global Variables ************/
@@ -64,9 +66,9 @@ PmodDHB2 pmodDHB2;
 int main(void) {
    DemoInitialize();
 
-   while(1){
-   DemoRun();
-   }
+
+   Run();
+
 
    DemoCleanup();
    return 0;
@@ -84,63 +86,53 @@ void DemoInitialize() {
    DHB2_motorDisable(&pmodDHB2);
 }
 
-void DemoRun() {
+void Run() {
    // first parameter is low, second parameter is high.
    DHB1_setMotorSpeeds(&pmodDHB1, 95, 95);		// JD = motor 1 top, motor 2 bottom
    DHB2_setMotorSpeeds(&pmodDHB2, 95, 95);		// JE = motor 3 top, motor 4 bottom
 
-   DHB1_motorDisable(&pmodDHB1); // Disable PWM before changing direction
-   DHB2_motorDisable(&pmodDHB2);
-   usleep(6);                    // short circuit possible otherwise
-   DHB1_setDirs(&pmodDHB1, 0, 1); // Set direction forward
-   DHB2_setDirs(&pmodDHB2, 0, 1); // Set direction forward
-   drive(); // Drive until sensor produces 240 positive edges
-
-   usleep(2000);
-   DHB1_motorDisable(&pmodDHB1);
-   DHB2_motorDisable(&pmodDHB2);
+   drive_forward();
    usleep(6);
-   DHB1_setDirs(&pmodDHB1, 1, 0); // Set direction backward
-   DHB2_setDirs(&pmodDHB2, 1, 0); // Set direction backward
-   drive();
+   drive_back();
 
-   usleep(2000);
-   DHB1_motorDisable(&pmodDHB1);
-   DHB2_motorDisable(&pmodDHB2);
-   usleep(6);
-   DHB1_setDirs(&pmodDHB1, 1, 1); // Set direction left
-   DHB2_setDirs(&pmodDHB2, 1, 1); // Set direction left
-   drive();
 
-   usleep(2000);
-   DHB1_motorDisable(&pmodDHB1);
-   DHB2_motorDisable(&pmodDHB2);
-   usleep(6);
-   DHB1_setDirs(&pmodDHB1, 0, 0); // Set direction right
-   DHB2_setDirs(&pmodDHB2, 0, 0); // Set direction right
-   drive();
 }
 
 void DemoCleanup() {
    DisableCaches();
 }
 
-void drive() {
+void drive_forward() { // case to move all 4 motors forward
+   DHB1_motorDisable(&pmodDHB1); // Disable PWM before changing direction
+   DHB2_motorDisable(&pmodDHB2); // short circuit possible otherwise
+   usleep(6);
+   DHB1_setDirs(&pmodDHB1, 0, 0); // Set DIR A and B motors forward (left side)
+   DHB2_setDirs(&pmodDHB2, 1, 1); // Set DIR C and D motors forward (right side)
+   usleep(6);
    DHB1_motorEnable(&pmodDHB1);	// Motors A and B
    DHB2_motorEnable(&pmodDHB2);	// Motors C and D
 
-   for(int delay=0; delay<2500; delay++){
-	   xil_printf("Value of speed: %d \r \n",delay);
-	   	   if(delay == 2499){
-	   		xil_printf("DONE WITH FIRST CYCLE");
-	   		usleep(2000000);
-	   	   }
-   }
-
-   usleep(2000000);
+   xil_printf("\nRunning 4 motors forward\n");
+   usleep(6);
    DHB1_motorDisable(&pmodDHB1);
    DHB2_motorDisable(&pmodDHB2);
-   usleep(2000000);
+}
+
+void drive_back() { // case to move all 4 motors forward
+   DHB1_motorDisable(&pmodDHB1); // Disable PWM before changing direction
+   DHB2_motorDisable(&pmodDHB2); // short circuit possible otherwise
+   usleep(6);
+   DHB1_setDirs(&pmodDHB1, 1, 1); // Set DIR A and B motors forward (left side)
+   DHB2_setDirs(&pmodDHB2, 0, 0); // Set DIR C and D motors forward (right side)
+   usleep(6);
+
+   DHB1_motorEnable(&pmodDHB1);	// Motors A and B
+   DHB2_motorEnable(&pmodDHB2);	// Motors C and D
+
+   xil_printf("\nRunning 4 motors forward\n");
+   usleep(6);
+   DHB1_motorDisable(&pmodDHB1);
+   DHB2_motorDisable(&pmodDHB2);
 }
 
 void EnableCaches() {
