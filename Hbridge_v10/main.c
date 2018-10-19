@@ -62,6 +62,7 @@ void drive_back();
 void drive_left();
 void drive_right();
 void stop_moving();
+void kill_switch();
 
 /************ Global Variables ************/
 
@@ -87,6 +88,7 @@ int main(void) {
 	// Init H-bridges
    DemoInitialize();
 
+   // polling data from switches/push buttons to control motors
    while(1){
 
   	// read input from channel 1 of axi_gpio_0 (buttons) and pass that data to "button_data" variable
@@ -113,14 +115,16 @@ int main(void) {
   	  	 usleep(6);
   	  	 }
 
+  	else if(switch_data == 0b1111){
+  	  	 kill_switch();
+  	  	 usleep(6);
+  	  	 }
+
   	else{
   		stop_moving();
   	}
 
      }
-
-   // polling data from switches/push buttons to control motors
-   Run();
 
    DemoCleanup();
    return 0;
@@ -138,17 +142,6 @@ void DemoInitialize() {
    DHB2_motorDisable(&pmodDHB2);
 }
 
-void Run() {
-
-   drive_forward();
-   usleep(6);
-   drive_back();
-   usleep(6);
-   drive_left();
-   usleep(6);
-   drive_right();
-   usleep(6);
-}
 
 void DemoCleanup() {
    DisableCaches();
@@ -245,8 +238,17 @@ void drive_right() {
 
 void stop_moving(){
 	usleep(6);
+	xil_printf("\nMOTORS ON\n");
 	DHB1_motorDisable(&pmodDHB1);
 	DHB2_motorDisable(&pmodDHB2);
+}
+
+void kill_switch(){
+	usleep(6);
+	DHB1_motorDisable(&pmodDHB1);
+	DHB2_motorDisable(&pmodDHB2);
+	xil_printf("\nALL MOTORS DISABLED\n");
+	sleep(45);	// virtual kill switch ~ kill motors for 45 seconds only, then run stop_moving
 }
 
 void EnableCaches() {
