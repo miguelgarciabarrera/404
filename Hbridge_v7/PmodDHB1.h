@@ -1,22 +1,9 @@
 /******************************************************************************/
 /*                                                                            */
-/* PmodDHB1.h -- Driver definitions for the PmodDHB1                          */
+/* PmodDHB1.h -- Driver definitions for the PmodDHB1 and PmodDHB2             */
 /*                                                                            */
 /******************************************************************************/
-/* Author: Arvin Tang                                                         */
-/*                                                                            */
-/******************************************************************************/
-/* File Description:                                                          */
-/*                                                                            */
-/* This file contains the drivers for the PmodDHB1 IP from Digilent           */
-/*                                                                            */
-/******************************************************************************/
-/* Revision History:                                                          */
-/*                                                                            */
-/*    09/13/2017(atangzwj): Created                                           */
-/*    02/03/2018(atangzwj): Validated for Vivado 2017.4                       */
-/*                                                                            */
-/******************************************************************************/
+/* Author: Miguel Garcia-Barrera                                              */
 
 #ifndef PmodDHB1_H
 #define PmodDHB1_H

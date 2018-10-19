@@ -104,8 +104,10 @@ void drive_forward() { // case to move all 4 motors forward
    DHB1_motorDisable(&pmodDHB1); // Disable PWM before changing direction
    DHB2_motorDisable(&pmodDHB2); // short circuit possible otherwise
    usleep(6);
+
    DHB1_setDirs(&pmodDHB1, 0, 0); // Set DIR A and B motors forward (left side)
    DHB2_setDirs(&pmodDHB2, 1, 1); // Set DIR C and D motors forward (right side)
+
    usleep(6);
    DHB1_motorEnable(&pmodDHB1);	// Motors A and B
    DHB2_motorEnable(&pmodDHB2);	// Motors C and D
@@ -123,8 +125,8 @@ void drive_back() { // case to move all 4 motors backward
    DHB1_motorDisable(&pmodDHB1); // Disable PWM before changing direction
    DHB2_motorDisable(&pmodDHB2); // short circuit possible otherwise
    usleep(6);
-   DHB1_setDirs(&pmodDHB1, 1, 1); // Set DIR A and B motors forward (left side)
-   DHB2_setDirs(&pmodDHB2, 0, 0); // Set DIR C and D motors forward (right side)
+   DHB1_setDirs(&pmodDHB1, 1, 1); // Set DIR A and B motors backwards (left side)
+   DHB2_setDirs(&pmodDHB2, 0, 0); // Set DIR C and D motors backwards (right side)
    usleep(6);
 
    DHB1_motorEnable(&pmodDHB1);	// Motors A and B
@@ -136,45 +138,49 @@ void drive_back() { // case to move all 4 motors backward
    DHB2_motorDisable(&pmodDHB2);
 }
 
-/*move C and D motors at max seed, but still move A and B at min speed to help with torque
- * directions set in move forward mode	*/
+/*move C and D motors at max speed to turn left,
+ * AND also move A and B at MAX speed but in opposite direction
+ * to help with torque and turn better	*/
 void drive_left() {
-   DHB1_setMotorSpeeds(&pmodDHB1, 10, 10);		// JD = motor 1 top, motor 2 bottom
+   DHB1_setMotorSpeeds(&pmodDHB1, 99, 99);		// JD = motor 1 top, motor 2 bottom
    DHB2_setMotorSpeeds(&pmodDHB2, 99, 99);		// JE = motor 3 top, motor 4 bottom
 
    DHB1_motorDisable(&pmodDHB1); // Disable PWM before changing direction
    DHB2_motorDisable(&pmodDHB2); // short circuit possible otherwise
    usleep(6);
-   DHB1_setDirs(&pmodDHB1, 0, 0); // Set DIR A and B motors forward (left side)
+   DHB1_setDirs(&pmodDHB1, 1, 1); // Set DIR A and B motors back (left side)
    DHB2_setDirs(&pmodDHB2, 1, 1); // Set DIR C and D motors forward (right side)
    usleep(6);
 
    DHB1_motorEnable(&pmodDHB1);	// Motors A and B
    DHB2_motorEnable(&pmodDHB2);	// Motors C and D
 
-   xil_printf("\nRunning 4 motors backward\n");
+   xil_printf("\nRunning 4 motors left\n");
    usleep(6);
    DHB1_motorDisable(&pmodDHB1);
    DHB2_motorDisable(&pmodDHB2);
 }
 
-/*move A and B motors at max speed, but still move C and D at min speed to help with torque
- * directions set in move forward mode	*/
+/*move A and B motors at max speed to turn right,
+ * AND still move C and D at max speed to help with torque
+ * and turn better	*/
 void drive_right() {
    DHB1_setMotorSpeeds(&pmodDHB1, 99, 99);		// JD = motor 1 top, motor 2 bottom
-   DHB2_setMotorSpeeds(&pmodDHB2, 10, 10);		// JE = motor 3 top, motor 4 bottom
+   DHB2_setMotorSpeeds(&pmodDHB2, 99, 99);		// JE = motor 3 top, motor 4 bottom
 
    DHB1_motorDisable(&pmodDHB1); // Disable PWM before changing direction
    DHB2_motorDisable(&pmodDHB2); // short circuit possible otherwise
    usleep(6);
+
    DHB1_setDirs(&pmodDHB1, 0, 0); // Set DIR A and B motors forward (left side)
-   DHB2_setDirs(&pmodDHB2, 1, 1); // Set DIR C and D motors forward (right side)
+   DHB2_setDirs(&pmodDHB2, 0, 0); // Set DIR C and D motors back (right side)
+
    usleep(6);
 
    DHB1_motorEnable(&pmodDHB1);	// Motors A and B
    DHB2_motorEnable(&pmodDHB2);	// Motors C and D
 
-   xil_printf("\nRunning 4 motors backward\n");
+   xil_printf("\nRunning 4 motors right\n");
    usleep(6);
    DHB1_motorDisable(&pmodDHB1);
    DHB2_motorDisable(&pmodDHB2);
