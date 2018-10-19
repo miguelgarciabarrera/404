@@ -16,8 +16,17 @@
 #include "xil_cache.h"
 #include "xparameters.h"
 
+// headers for GPIO
+#include "xil_io.h"
+#include "sleep.h"
+#include <xgpio.h>
+#include "platform.h"
+#include <stdio.h>
 
 /************ Macro Definitions ************/
+
+//GPIO control
+#define GPIO_BASEADDR     XPAR_PMODDHB1_0_AXI_LITE_GPIO_BASEADDR
 
 //PMOD JD
 #define JD_GPIO_BASEADDR     XPAR_PMODDHB1_0_AXI_LITE_GPIO_BASEADDR
@@ -61,8 +70,36 @@ PmodDHB2 pmodDHB2;
 /************ Function Definitions ************/
 
 int main(void) {
+
+    // GPIO getting ready
+    XGpio input;
+	int button_data = 0;
+	int switch_data = 0;
+
+	xil_printf("\nApplication started.... \r \n");
+
+	XGpio_Initialize(&input, XPAR_AXI_GPIO_0_DEVICE_ID);	//initialize input XGpio variable
+
+	/******************************************************************************/
+	/******************************************************************************/
+
+	// Init H-bridges
    DemoInitialize();
 
+   while(1){
+
+  	// read input from channel 1 of axi_gpio_0 (buttons) and pass that data to "button_data" variable
+  	button_data = XGpio_DiscreteRead(&input, 1);
+  	switch_data = XGpio_DiscreteRead(&input, 2); // read switch input and store data in variable
+
+  	if(button_data == 0b0001){
+  		drive_forward();
+  	    usleep(6);
+  		}
+
+     }
+
+   // polling data from switches/push buttons to control motors
    Run();
 
    DemoCleanup();
