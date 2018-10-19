@@ -61,6 +61,7 @@ void drive_forward();
 void drive_back();
 void drive_left();
 void drive_right();
+void stop_moving();
 
 /************ Global Variables ************/
 
@@ -93,9 +94,28 @@ int main(void) {
   	switch_data = XGpio_DiscreteRead(&input, 2); // read switch input and store data in variable
 
   	if(button_data == 0b0001){
-  		drive_forward();
+  		drive_left();
   	    usleep(6);
   		}
+
+  	else if(button_data == 0b0010){
+  	  	drive_forward();
+  	  	usleep(6);
+  	  	}
+
+  	else if(button_data == 0b0100){
+  	  	 drive_back();
+  	  	 usleep(6);
+  	  	 }
+
+  	else if(button_data == 0b1000){
+  	  	 drive_right();
+  	  	 usleep(6);
+  	  	 }
+
+  	else{
+  		stop_moving();
+  	}
 
      }
 
@@ -221,6 +241,12 @@ void drive_right() {
    usleep(6);
    DHB1_motorDisable(&pmodDHB1);
    DHB2_motorDisable(&pmodDHB2);
+}
+
+void stop_moving(){
+	usleep(6);
+	DHB1_motorDisable(&pmodDHB1);
+	DHB2_motorDisable(&pmodDHB2);
 }
 
 void EnableCaches() {
