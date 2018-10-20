@@ -95,36 +95,36 @@ int main(void) {
   	button_data = XGpio_DiscreteRead(&input, 1);
   	switch_data = XGpio_DiscreteRead(&input, 2); // read switch input and store data in variable
 
-  	if(button_data == 0b0001){
-  		drive_left();
-  	    usleep(6);
-  		}
+  	// replacing if-else by switch-case statement
+  	switch (button_data)
+  	{
+  		case 1:
+  			drive_left();
+  			usleep(6);
+  		break;
 
-  	else if(button_data == 0b0010){
-  	  	drive_forward();
-  	  	usleep(6);
-  	  	}
+  		case 2:
+  			drive_forward();
+  			usleep(6);
+  		break;
 
-  	else if(button_data == 0b0100){
-  	  	 drive_back();
-  	  	 usleep(6);
-  	  	 }
+  		case 4:
+  			drive_back();
+  			usleep(6);
+  		break;
 
-  	else if(button_data == 0b1000){
-  	  	 drive_right();
-  	  	 usleep(6);
-  	  	 }
+  		case 8:
+  			drive_right();
+  			usleep(6);
+  		break;
 
-  	else if(switch_data == 0b1111){
-  	  	 kill_switch();
-  	  	 usleep(6);
-  	  	 }
-
-  	else{
-  		stop_moving();
+  		default:
+  			stop_moving();
+  		break;
   	}
 
-     }
+
+}
 
    DemoCleanup();
    return 0;
@@ -162,7 +162,7 @@ void drive_forward() { // case to move all 4 motors forward
    DHB1_motorEnable(&pmodDHB1);	// Motors A and B
    DHB2_motorEnable(&pmodDHB2);	// Motors C and D
 
-   xil_printf("\nRunning 4 motors forward\n");
+   //xil_printf("\nRunning 4 motors forward\n");
    usleep(6);
    DHB1_motorDisable(&pmodDHB1);
    DHB2_motorDisable(&pmodDHB2);
@@ -182,7 +182,7 @@ void drive_back() { // case to move all 4 motors backward
    DHB1_motorEnable(&pmodDHB1);	// Motors A and B
    DHB2_motorEnable(&pmodDHB2);	// Motors C and D
 
-   xil_printf("\nRunning 4 motors backward\n");
+   //xil_printf("\nRunning 4 motors backward\n");
    usleep(6);
    DHB1_motorDisable(&pmodDHB1);
    DHB2_motorDisable(&pmodDHB2);
@@ -205,7 +205,7 @@ void drive_left() {
    DHB1_motorEnable(&pmodDHB1);	// Motors A and B
    DHB2_motorEnable(&pmodDHB2);	// Motors C and D
 
-   xil_printf("\nRunning 4 motors left\n");
+   //xil_printf("\nRunning 4 motors left\n");
    usleep(6);
    DHB1_motorDisable(&pmodDHB1);
    DHB2_motorDisable(&pmodDHB2);
@@ -230,7 +230,7 @@ void drive_right() {
    DHB1_motorEnable(&pmodDHB1);	// Motors A and B
    DHB2_motorEnable(&pmodDHB2);	// Motors C and D
 
-   xil_printf("\nRunning 4 motors right\n");
+   //xil_printf("\nRunning 4 motors right\n");
    usleep(6);
    DHB1_motorDisable(&pmodDHB1);
    DHB2_motorDisable(&pmodDHB2);
@@ -238,7 +238,7 @@ void drive_right() {
 
 void stop_moving(){
 	usleep(6);
-	xil_printf("\nMOTORS ON\n");
+	//xil_printf("\nMOTORS ON\n");
 	DHB1_motorDisable(&pmodDHB1);
 	DHB2_motorDisable(&pmodDHB2);
 }
@@ -247,7 +247,7 @@ void kill_switch(){
 	usleep(6);
 	DHB1_motorDisable(&pmodDHB1);
 	DHB2_motorDisable(&pmodDHB2);
-	xil_printf("\nALL MOTORS DISABLED\n");
+	//xil_printf("\nALL MOTORS DISABLED\n");
 	sleep(45);	// virtual kill switch ~ kill motors for 45 seconds only, then run stop_moving
 }
 
