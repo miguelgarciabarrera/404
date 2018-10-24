@@ -228,6 +228,7 @@ int UartPsPolledExample(u16 DeviceId)
 	 */
 	for (Index = 0; Index < TEST_BUFFER_SIZE; Index++) {
 		//SendBuffer[Index] = '0' + Index;  // this is getting : and ; for #s over 9
+		//SendBuffer[Index] = Index;
 		SendBuffer[Index] = Index;
 		RecvBuffer[Index] = 0;
 	}
@@ -281,15 +282,35 @@ int UartPsPolledExample(u16 DeviceId)
 		ReceivedCount += XUartPs_Recv(&Uart_PS, &RecvBuffer[ReceivedCount], (TEST_BUFFER_SIZE - ReceivedCount));
 	}
 
+	//Frankenstein version of receive data functions from Dr. Lusher
+	//while (XUartPs_IsReceiveData(Uart_PS.Config.BaseAddress))
+		//{
+		// DOUBLE CHECK THIS --- 10/15 mg
+			u8 buffer[32];
+			XUartPs_Recv(&Uart_PS, buffer, 1);
+	//	}
+
+	/*
+	 * --------------------------------------------------------------------------
+	 * --------------------------------------------------------------------------
+	 * --------------------------------------------------------------------------
+	 * --------------------------------------------------------------------------
+	 */
+
+	// should not need this function below only as a check
+
 	/*
 	 * Check the receive buffer against the send buffer and verify the
 	 * data was correctly received
 	 */
+
+	/*
 	for (Index = 0; Index < TEST_BUFFER_SIZE; Index++) {
 		if (SendBuffer[Index] != RecvBuffer[Index]) {
 			return XST_FAILURE;
 		}
 	}
+	*/
 
 	/* Restore to normal mode. */
 	//XUartPs_SetOperMode(&Uart_PS, XUARTPS_OPER_MODE_NORMAL);
