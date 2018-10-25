@@ -23,6 +23,11 @@
 #include "platform.h"
 #include <stdio.h>
 
+// headers for UART
+#include "xuartps.h"
+#include "xil_printf.h"
+
+
 /************ Macro Definitions ************/
 
 //GPIO control
@@ -46,13 +51,24 @@
 
 #define PWM_PER 2
 
+////////////////////////////////////////////////////
+////////////////////////////////////////////////////
+//UART
+//#define UART_DEVICE_ID		XPAR_XUARTPS_0_DEVICE_ID
 
+/*
+ * The following constant controls the length of the buffers to be sent
+ * and received with the device, this constant must be 32 bytes or less since
+ * only as much as FIFO size data can be sent or received in polled mode.
+ */
+#define TEST_BUFFER_SIZE 16		// SEND INTERVALS OF 2 BYTES, mg
+static u8 RecvBuffer[TEST_BUFFER_SIZE];	/* Buffer for Receiving Data */
 
 /************ Function Prototypes ************/
 
-void DemoInitialize();
+void Initialize_bridges();
 void Run();
-void DemoCleanup();
+void Cleanup();
 
 void EnableCaches();
 void DisableCaches();
@@ -68,13 +84,16 @@ void kill_switch();
 
 PmodDHB1 pmodDHB1;
 PmodDHB2 pmodDHB2;
+XGpio input;
+XUartPs Uart_PS;		/* Instance of the UART Device */
+
 
 /************ Function Definitions ************/
 
 int main(void) {
 
     // GPIO getting ready
-    XGpio input;
+
 	int button_data = 0;
 	int switch_data = 0;
 
@@ -85,8 +104,27 @@ int main(void) {
 	/******************************************************************************/
 	/******************************************************************************/
 
+	// init UART
+	XUartPs_Config *Config;
+	unsigned int ReceivedCount;
+	ReceivedCount = 0;
+
+	/*
+	 * Initialize the UART driver so that it's ready to use.
+	 * Look up the configuration in the config table, then initialize it.
+	*/
+		Config = XUartPs_LookupConfig(XPAR_XUARTPS_0_DEVICE_ID); // changed param 10/25
+		if (NULL == Config) {
+			return XST_FAILURE;
+		}
+
+		XUartPs_CfgInitialize(&Uart_PS, Config, Config->BaseAddress);
+
+	XUartPs_SetBaudRate(&Uart_PS, 9600);	// changed value
+	XUartPs_SetOperMode(&Uart_PS, XUARTPS_OPER_MODE_NORMAL);
+
 	// Init H-bridges
-   DemoInitialize();
+	Initialize_bridges();
 
    // polling data from switches/push buttons to control motors
    while(1){
@@ -95,22 +133,25 @@ int main(void) {
   	button_data = XGpio_DiscreteRead(&input, 1);
   	switch_data = XGpio_DiscreteRead(&input, 2); // read switch input and store data in variable
 
-  	if(button_data == 0b0001){
+  	// receive buffer to control motors with XBEE
+  	XUartPs_Recv(&Uart_PS, &RecvBuffer[ReceivedCount], (TEST_BUFFER_SIZE - ReceivedCount));
+
+  	if(RecvBuffer[0] == '9'){
   		drive_left();
   	    usleep(6);
   		}
 
-  	else if(button_data == 0b0010){
+  	else if(RecvBuffer[0] == '1'){
   	  	drive_forward();
   	  	usleep(6);
   	  	}
 
-  	else if(button_data == 0b0100){
+  	else if(RecvBuffer[0] == '2'){
   	  	 drive_back();
   	  	 usleep(6);
   	  	 }
 
-  	else if(button_data == 0b1000){
+  	else if(RecvBuffer[0] == '3'){
   	  	 drive_right();
   	  	 usleep(6);
   	  	 }
@@ -126,11 +167,11 @@ int main(void) {
 
      }
 
-   DemoCleanup();
+   Cleanup();
    return 0;
 }
 
-void DemoInitialize() {
+void Initialize_bridges() {
    EnableCaches();
 
    //init the 2 hbridges
@@ -143,7 +184,7 @@ void DemoInitialize() {
 }
 
 
-void DemoCleanup() {
+void Cleanup() {
    DisableCaches();
 }
 
