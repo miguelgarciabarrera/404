@@ -72,7 +72,7 @@
  * and received with the device, this constant must be 32 bytes or less since
  * only as much as FIFO size data can be sent or received in polled mode.
  */
-#define TEST_BUFFER_SIZE 16		// SEND INTERVALS OF 2 BYTES, mg
+#define TEST_BUFFER_SIZE 64		// SEND INTERVALS OF 2 BYTES, mg
 
 /**************************** Type Definitions *******************************/
 
@@ -278,8 +278,9 @@ int UartPsPolledExample(u16 DeviceId)
 
 	/* Block receiving the buffer. */
 	ReceivedCount = 0;
-	while (ReceivedCount < TEST_BUFFER_SIZE) {
-		ReceivedCount += XUartPs_Recv(&Uart_PS, &RecvBuffer[ReceivedCount], (TEST_BUFFER_SIZE - ReceivedCount));
+	//while (ReceivedCount < TEST_BUFFER_SIZE) {  // CHANGED DURING TESTING 8/24
+	while (1) {
+		XUartPs_Recv(&Uart_PS, &RecvBuffer[ReceivedCount], (TEST_BUFFER_SIZE - ReceivedCount));
 	}
 
 	//Frankenstein version of receive data functions from Dr. Lusher
