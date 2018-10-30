@@ -28,6 +28,12 @@ typedef struct PmodDHB2 {
    u32 PWM_per;
 } PmodDHB2;
 
+
+typedef struct PmodDHB3 {
+   u32 GPIO_addr;
+   u32 PWM_addr;
+   u32 PWM_per;
+} PmodDHB3;
 /************ Function Prototypes ************/
 
 
@@ -71,5 +77,26 @@ void DHB2_setMotorSpeeds(PmodDHB2 *InstancePtr, u8 m1, u8 m2);
 void DHB2_setMotor1Speed(PmodDHB2 *InstancePtr, u8 m1);
 
 void DHB2_setMotor2Speed(PmodDHB2 *InstancePtr, u8 m2);
+
+
+// PMOD 3
+void DHB3_begin(PmodDHB3 *InstancePtr, u32 GPIO_Address, u32 PWM_Address,
+      u32 Clk_Freq, u32 PWM_Per);
+
+void DHB3_motorEnable(PmodDHB3 *InstancePtr);
+
+void DHB3_motorDisable(PmodDHB3 *InstancePtr);
+
+void DHB3_setDirs(PmodDHB3 *InstancePtr, u8 dir1, u8 dir2);
+
+void DHB3_setDir1(PmodDHB3 *InstancePtr, u8 dir1);
+
+void DHB3_setDir2(PmodDHB3 *InstancePtr, u8 dir2);
+
+void DHB3_setMotorSpeeds(PmodDHB3 *InstancePtr, u8 m1, u8 m2);
+
+void DHB3_setMotor1Speed(PmodDHB3 *InstancePtr, u8 m1);
+
+void DHB3_setMotor2Speed(PmodDHB3 *InstancePtr, u8 m2);
 
 #endif // PmodDHB1_H

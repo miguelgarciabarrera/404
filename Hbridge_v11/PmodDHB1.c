@@ -56,6 +56,15 @@ void DHB2_begin(PmodDHB2 *InstancePtr, u32 GPIO_Address, u32 PWM_Address,
    DHB2_motorDisable(InstancePtr);
 }
 
+void DHB3_begin(PmodDHB3 *InstancePtr, u32 GPIO_Address, u32 PWM_Address,
+      u32 Clk_Freq, u32 PWM_Per) {
+   InstancePtr->GPIO_addr = GPIO_Address;
+   InstancePtr->PWM_addr  = PWM_Address;
+   InstancePtr->PWM_per   = Clk_Freq * PWM_Per / 1000;
+
+   PWM_Set_Period(PWM_Address, InstancePtr->PWM_per);
+   DHB3_motorDisable(InstancePtr);
+}
 
 /*
  * void DHB1_motorEnable(PmodDHB1 *InstancePtr)
@@ -78,6 +87,9 @@ void DHB2_motorEnable(PmodDHB2 *InstancePtr) {
    PWM_Enable(InstancePtr->PWM_addr);
 }
 
+void DHB3_motorEnable(PmodDHB3 *InstancePtr) {
+   PWM_Enable(InstancePtr->PWM_addr);
+}
 //////////////////////////////
 //////////////////////////////
 void DHB1_motorDisable(PmodDHB1 *InstancePtr) {
@@ -85,6 +97,10 @@ void DHB1_motorDisable(PmodDHB1 *InstancePtr) {
 }
 
 void DHB2_motorDisable(PmodDHB2 *InstancePtr) {
+   PWM_Disable(InstancePtr->PWM_addr);
+}
+
+void DHB3_motorDisable(PmodDHB3 *InstancePtr) {
    PWM_Disable(InstancePtr->PWM_addr);
 }
 
@@ -118,6 +134,10 @@ void DHB2_setDirs(PmodDHB2 *InstancePtr, u8 dir1, u8 dir2) {
    DHB2_setDir2(InstancePtr, dir2);
 }
 
+void DHB3_setDirs(PmodDHB3 *InstancePtr, u8 dir1, u8 dir2) {
+   DHB3_setDir1(InstancePtr, dir1);
+   DHB3_setDir2(InstancePtr, dir2);
+}
 
 //////////////////////////////
 //////////////////////////////
@@ -136,6 +156,17 @@ void DHB2_setDir1(PmodDHB2 *InstancePtr, u8 dir1) {
 }
 
 void DHB2_setDir2(PmodDHB2 *InstancePtr, u8 dir2) {
+   Xil_Out8(InstancePtr->GPIO_addr + DHB1_GPIO_CHANNEL_OFFSET, dir2);
+}
+
+
+/////
+
+void DHB3_setDir1(PmodDHB3 *InstancePtr, u8 dir1) {
+   Xil_Out8(InstancePtr->GPIO_addr, dir1);
+}
+
+void DHB3_setDir2(PmodDHB3 *InstancePtr, u8 dir2) {
    Xil_Out8(InstancePtr->GPIO_addr + DHB1_GPIO_CHANNEL_OFFSET, dir2);
 }
 
@@ -167,6 +198,10 @@ void DHB2_setMotorSpeeds(PmodDHB2 *InstancePtr, u8 m1, u8 m2) {
    DHB2_setMotor2Speed(InstancePtr, m2);
 }
 
+void DHB3_setMotorSpeeds(PmodDHB3 *InstancePtr, u8 m1, u8 m2) {
+   DHB3_setMotor1Speed(InstancePtr, m1);
+   DHB3_setMotor2Speed(InstancePtr, m2);
+}
 
 ///////////////////////////
 ///////////////////////////
@@ -200,3 +235,20 @@ void DHB2_setMotor2Speed(PmodDHB2 *InstancePtr, u8 m2) {
    u32 PWM_per  = InstancePtr->PWM_per;
    PWM_Set_Duty(PWM_addr, (u32) (duty_cycle * PWM_per), 1);
 }
+
+
+
+void DHB3_setMotor1Speed(PmodDHB3 *InstancePtr, u8 m1) {
+   double duty_cycle = m1 / 100.0;
+   u32 PWM_addr = InstancePtr->PWM_addr;
+   u32 PWM_per  = InstancePtr->PWM_per;
+   PWM_Set_Duty(PWM_addr, (u32) (duty_cycle * PWM_per), 0);
+}
+
+void DHB3_setMotor2Speed(PmodDHB3 *InstancePtr, u8 m2) {
+   double duty_cycle = m2 / 100.0;
+   u32 PWM_addr = InstancePtr->PWM_addr;
+   u32 PWM_per  = InstancePtr->PWM_per;
+   PWM_Set_Duty(PWM_addr, (u32) (duty_cycle * PWM_per), 1);
+}
+

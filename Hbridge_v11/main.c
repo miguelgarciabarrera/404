@@ -42,6 +42,10 @@
 #define JE_PWM_BASEADDR      XPAR_PMODDHB1_1_PWM_AXI_BASEADDR
 
 
+//PMOD JC FOR WEAPON
+#define JC_GPIO_BASEADDR	 XPAR_PMODDHB1_2_AXI_LITE_GPIO_BASEADDR
+#define JC_PWM_BASEADDR		 XPAR_PMODDHB1_2_PWM_AXI_BASEADDR
+
 #ifdef __MICROBLAZE__	// ifdef and endif pair. define below used if found in xparamters.h
 #define CLK_FREQ XPAR_CPU_M_AXI_DP_FREQ_HZ
 #else
@@ -79,11 +83,13 @@ void drive_left();
 void drive_right();
 void stop_moving();
 void kill_switch();
+void weapon_motor_drive();
 
 /************ Global Variables ************/
 
 PmodDHB1 pmodDHB1;
 PmodDHB2 pmodDHB2;
+PmodDHB3 pmodDHB3;
 XGpio input;
 XUartPs Uart_PS;		/* Instance of the UART Device */
 
@@ -93,7 +99,6 @@ XUartPs Uart_PS;		/* Instance of the UART Device */
 int main(void) {
 
     // GPIO getting ready
-
 	int button_data = 0;
 	int switch_data = 0;
 
@@ -125,6 +130,9 @@ int main(void) {
 
 	// Init H-bridges
 	Initialize_bridges();
+
+	// turn on weapon motor
+	weapon_motor_drive();
 
    // polling data from switches/push buttons to control motors
    while(1){
@@ -174,13 +182,15 @@ int main(void) {
 void Initialize_bridges() {
    EnableCaches();
 
-   //init the 2 hbridges
+   //init the 3 hbridges
    DHB1_begin(&pmodDHB1, JD_GPIO_BASEADDR, JD_PWM_BASEADDR, CLK_FREQ, PWM_PER);
    DHB2_begin(&pmodDHB2, JE_GPIO_BASEADDR, JE_PWM_BASEADDR, CLK_FREQ, PWM_PER);
+   DHB3_begin(&pmodDHB3, JE_GPIO_BASEADDR, JE_PWM_BASEADDR, CLK_FREQ, PWM_PER);
 
-   // disable the 2 hbridges
+   // disable the 3 hbridges
    DHB1_motorDisable(&pmodDHB1);
    DHB2_motorDisable(&pmodDHB2);
+   DHB3_motorDisable(&pmodDHB3);
 }
 
 
@@ -277,6 +287,27 @@ void drive_right() {
    DHB2_motorDisable(&pmodDHB2);
 }
 
+
+/*
+ * function to drive weapon motor
+ */
+void weapon_motor_drive() {
+   DHB3_setMotorSpeeds(&pmodDHB3, 99, 99);		// JC set pwm speed
+
+   DHB3_motorDisable(&pmodDHB3); // Disable PWM before changing direction
+   usleep(6);
+
+   DHB3_setDirs(&pmodDHB3, 0, 0); // Set DIR of both pins forward
+
+   usleep(6);
+
+   DHB3_motorEnable(&pmodDHB3);	// Motors A and B
+
+   xil_printf("\nRunning 4 motors right\n");
+   usleep(6);
+   //DHB3_motorDisable(&pmodDHB3);  // always ON if commented out
+}
+
 void stop_moving(){
 	usleep(6);
 	xil_printf("\nMOTORS ON\n");
@@ -288,6 +319,7 @@ void kill_switch(){
 	usleep(6);
 	DHB1_motorDisable(&pmodDHB1);
 	DHB2_motorDisable(&pmodDHB2);
+	DHB3_motorDisable(&pmodDHB3);
 	xil_printf("\nALL MOTORS DISABLED\n");
 	sleep(45);	// virtual kill switch ~ kill motors for 45 seconds only, then run stop_moving
 }
