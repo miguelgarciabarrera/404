@@ -91,6 +91,9 @@
  */
 #define TEST_BUFFER_SIZE 16		// SEND INTERVALS OF 2 BYTES, mg
 static u8 RecvBuffer[TEST_BUFFER_SIZE];	/* Buffer for Receiving Data */
+static u8 SendBuffer[TEST_BUFFER_SIZE];	/* Buffer for Transmitting Data - change to char to debug */
+int SendComplete = 1;
+int ConsoleTXBufferIndex = 0;
 
 /************ Function Prototypes ************/
 
@@ -127,12 +130,14 @@ INTC intc;
 
 
 /************ Function Definitions ************/
+int switch_data = 0;
+int gps_index = 0;
 
 int main(void) {
 
     // GPIO getting ready
 	int button_data = 0;
-	int switch_data = 0;
+
 
 	xil_printf("\nApplication started.... \r \n");
 
@@ -201,10 +206,17 @@ int main(void) {
   	  	 usleep(6);
   	  	 }
 
-  	else if(switch_data == 0b0000){
+  	else if(button_data == 0b0001){
   	  	 gps_data();
   	  	 usleep(6);
   	   	 }
+
+  	else if(switch_data == 0b1001){
+  	      SendBuffer[0] = 7;
+  	      xil_printf("Sending to XBEE: %d \n", SendBuffer[0]);
+  	      XUartPs_Send(&Uart_PS, (u8 *)&SendBuffer[0], 1);
+  	      usleep(6);
+  		 }
 
   	else{
   		stop_moving();
@@ -386,7 +398,7 @@ void gpsInitialize() {
 
 
 void gpsRun() {
-   while (1) {
+   while (switch_data == 0b0000) {
       if (GPS.ping) {
          GPS_formatSentence(&GPS);
          if (GPS_isFixed(&GPS)) {
@@ -394,9 +406,21 @@ void gpsRun() {
             xil_printf("Longitude: %s\n\r", GPS_getLongitude(&GPS));
             xil_printf("Altitude: %s\n\r", GPS_getAltitudeString(&GPS));
             xil_printf("Number of Satellites: %d\n\n\r", GPS_getNumSats(&GPS));
+            //int x = GPS_getLatitude(&GPS);
          } else {
             xil_printf("Number of Satellites: %d\n\r", GPS_getNumSats(&GPS));
          }
+
+         // send TX
+         //SendBuffer[0] = GPS_getLatitude(&GPS);
+        // SendBuffer[1] = GPS_getNumSats(&GPS);
+         gps_index = strlen(GPS_getLongitude(&GPS));
+
+         SendBuffer[2] = GPS_getLongitude(&GPS);
+
+         XUartPs_Send(&Uart_PS, (u8 *)&SendBuffer[2], 1);
+         //XUartPs_Send(&Uart_PS, (u8 *)&SendBuffer[1], 1);
+
          GPS.ping = FALSE;
       }
    }
