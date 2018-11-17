@@ -233,6 +233,13 @@ int UartPsPolledExample(u16 DeviceId)
 		RecvBuffer[Index] = 0;
 	}
 
+	/*
+	SendBuffer[3] = 'MIGUEL';
+	SendBuffer[2] = 'H';
+	SendBuffer[1] = 'A1.1';
+	*/
+	SendBuffer[0] = 9;
+
 
 	/*
 	 * --------------------------------------------------------------------------
@@ -255,7 +262,7 @@ int UartPsPolledExample(u16 DeviceId)
 	//while (ConsoleTXBufferIndex <  ConsoleTXBufferLen)  // comment out 11/15
 	while (1)
 		{
-			XUartPs_Send(&Uart_PS, (u8 *)&SendBuffer[ConsoleTXBufferIndex++], 1);
+			XUartPs_Send(&Uart_PS, (char *)&SendBuffer[0], 1);
 			//ConsoleTXBufferIndex++;
 		}
 
