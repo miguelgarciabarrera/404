@@ -132,6 +132,7 @@ INTC intc;
 /************ Function Definitions ************/
 int switch_data = 0;
 int gps_index = 0;
+u16 Index;
 
 int main(void) {
 
@@ -415,13 +416,22 @@ void gpsRun() {
          //SendBuffer[0] = GPS_getLatitude(&GPS);
         // SendBuffer[1] = GPS_getNumSats(&GPS);
          gps_index = strlen(GPS_getLongitude(&GPS));
+         strcpy(SendBuffer, GPS_getLongitude(&GPS));
 
-         SendBuffer[2] = GPS_getLongitude(&GPS);
 
-         XUartPs_Send(&Uart_PS, (u8 *)&SendBuffer[2], 1);
+         for (Index = 0; Index < gps_index; Index++) {
+         XUartPs_Send(&Uart_PS, (u8 *)&SendBuffer[Index], 1);
+         //sleep(5);
+         }
+
+
+         //SendBuffer[2] = GPS_getLongitude(&GPS);
+
+         //XUartPs_Send(&Uart_PS, (u8 *)&SendBuffer[2], 1);
          //XUartPs_Send(&Uart_PS, (u8 *)&SendBuffer[1], 1);
 
          GPS.ping = FALSE;
+         break;
       }
    }
    DisableCaches();
