@@ -202,22 +202,23 @@ int main(void) {
   	  	 usleep(6);
   	  	 }
 
-  	else if(switch_data == 0b1111){
+  	else if(button_data == 0b1010){
   	  	 kill_switch();
   	  	 usleep(6);
   	  	 }
 
-  	else if(button_data == 0b0001){
+  	else if(switch_data == 0b1111){
   	  	 gps_data();
   	  	 usleep(6);
   	   	 }
-
+  	/*
   	else if(switch_data == 0b1001){
   	      SendBuffer[0] = 7;
   	      xil_printf("Sending to XBEE: %d \n", SendBuffer[0]);
   	      XUartPs_Send(&Uart_PS, (u8 *)&SendBuffer[0], 1);
   	      usleep(6);
   		 }
+    */
 
   	else{
   		stop_moving();
@@ -399,7 +400,7 @@ void gpsInitialize() {
 
 
 void gpsRun() {
-   while (switch_data == 0b0000) {
+   //while (switch_data == 0b0000) {
       if (GPS.ping) {
          GPS_formatSentence(&GPS);
          if (GPS_isFixed(&GPS)) {
@@ -431,9 +432,9 @@ void gpsRun() {
          //XUartPs_Send(&Uart_PS, (u8 *)&SendBuffer[1], 1);
 
          GPS.ping = FALSE;
-         break;
+        // break;
       }
-   }
+   //}
    DisableCaches();
 }
 
